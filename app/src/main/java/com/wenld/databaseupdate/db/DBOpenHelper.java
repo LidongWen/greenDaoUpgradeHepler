@@ -30,7 +30,6 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int currentVersion, int lastestVersion) {
         try {
-
             DBMigrationHelper migratorHelper = new DBMigrationHelper();
             //判断版本， 设置需要修改得表  我这边设置一个 FileInfo
             if(true) {
