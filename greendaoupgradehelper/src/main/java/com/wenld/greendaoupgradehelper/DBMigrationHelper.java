@@ -1,13 +1,14 @@
-package com.wenld.databaseupdate.dbhelper;
+package com.wenld.greendaoupgradehelper;
 
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.wenld.databaseupdate.bean.FileInfoDao;
-
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,38 +19,52 @@ import de.greenrobot.dao.internal.DaoConfig;
 /**
  * Created by wenld- on 2015/12/24.
  */
-public class DBMigrationHelper1 extends AbstractMigratorHelper {
+public class DBMigrationHelper {
     private static final String CONVERSION_CLASS_NOT_FOUND_EXCEPTION = "MIGRATION HELPER - CLASS DOESN'T MATCH WITH THE CURRENT PARAMETERS";
-    private static DBMigrationHelper1 instance;
 
-    public static DBMigrationHelper1 getInstance() {
-        if (instance == null) {
-            instance = new DBMigrationHelper1();
+    public void onUpgrade(SQLiteDatabase db, Class<? extends AbstractDao<?, ?>>... daoClasses) {
+        generateTempTables(db,daoClasses); //备份数据（表结构改变的表）
+        dropAllTables(db, true, daoClasses);  //删除旧表（结构修改/新增）
+        createAllTables(db, false, daoClasses); //创建 新表（结构修改/新增）
+        restoreData(db, daoClasses);           //恢复数据（结构修改）
+    }
+
+    private void dropAllTables(SQLiteDatabase db, boolean b, Class<? extends AbstractDao<?, ?>>... daoClasses) {
+        if (daoClasses != null) {
+            reflectMethod(db, "dropTable", b, daoClasses);
         }
-        return instance;
     }
 
-    @Override
-    public void onUpgrade(SQLiteDatabase db) {
-//        migrate(db, NotesDao.class);
-        updateTable(db);  //  修改的表结构 操作（sql语句）。
-        generateTempTables(db, FileInfoDao.class); //备份数据（表结构改变的表）
-        dropAllTables(db, true, FileInfoDao.class);  //删除旧表（结构修改/新增）
-        createAllTables(db, false, FileInfoDao.class); //创建 新表（结构修改/新增）
-        restoreData(db, FileInfoDao.class);           //恢复数据（结构修改）
+    private void createAllTables(SQLiteDatabase db, boolean b, Class<? extends AbstractDao<?, ?>>... daoClasses) {
+        if (daoClasses != null) {
+            reflectMethod(db, "createTable", b, daoClasses);
+        }
     }
 
-    public void migrate(SQLiteDatabase db, Class... daoClasses) {
-
-    }
-
-    private void updateTable(SQLiteDatabase db) {
-//        String sql="ALTER TABLE NOTES ADD FLAG";
-//        db.execSQL(sql);
+    /**
+     * 反射出方法执行
+     */
+    private static void reflectMethod(SQLiteDatabase db, String methodName, boolean isExists, @NonNull Class<? extends AbstractDao<?, ?>>... daoClasses) {
+        if (daoClasses.length < 1) {
+            return;
+        }
+        try {
+            for (Class cls : daoClasses) {
+                Method method = cls.getDeclaredMethod(methodName, cls);
+                method.invoke(null, db, isExists);
+            }
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * 备份数据
+     *
      * @param db
      * @param daoClasses（表结构改变的表）
      */
@@ -92,18 +107,9 @@ public class DBMigrationHelper1 extends AbstractMigratorHelper {
         }
     }
 
-    private void dropAllTables(SQLiteDatabase db, boolean b,Class<? extends AbstractDao<?, ?>>... daoClasses) {
-//        NotesDao.dropTable(db,b);
-//        DaoMaster.dropAllTables(db, b);
-    }
-
-    private void createAllTables(SQLiteDatabase db, boolean b,Class<? extends AbstractDao<?, ?>>... daoClasses) {
-//        NotesDao.createTable(db,b);
-//        DaoMaster.createAllTables(db, b);
-    }
-
     /**
-     *   恢复数据
+     * 恢复数据
+     *
      * @param db
      * @param daoClasses（结构修改的表）
      */
@@ -173,4 +179,5 @@ public class DBMigrationHelper1 extends AbstractMigratorHelper {
         }
         return columns;
     }
+
 }

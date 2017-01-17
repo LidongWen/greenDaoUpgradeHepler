@@ -1,15 +1,19 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
 
+group = 'com.github.LiDongWen'
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
+
     defaultConfig {
-        applicationId "com.wenld.databaseupdate"
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
     }
     buildTypes {
         release {
@@ -25,6 +29,6 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:23.4.0'
-
-    compile project(':greendaoupgradehelper')
+    testCompile 'junit:junit:4.12'
+    compile 'de.greenrobot:greendao:2.1.0'
 }

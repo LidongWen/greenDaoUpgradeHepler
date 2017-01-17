@@ -1,18 +1,13 @@
 package com.wenld.databaseupdate.db;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.wenld.databaseupdate.bean.DaoMaster;
-import com.wenld.databaseupdate.dbhelper.AbstractMigratorHelper;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.wenld.databaseupdate.bean.FileInfoDao;
+import com.wenld.greendaoupgradehelper.DBMigrationHelper;
 
 
 /**
@@ -34,48 +29,14 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int currentVersion, int lastestVersion) {
-        for (int i = currentVersion; i < lastestVersion; i++) {
-            try {
-                AbstractMigratorHelper migratorHelper = (AbstractMigratorHelper) Class.forName(this.getClass().getName() + ".DBMigrationHelper" + i).newInstance();
-                migratorHelper.onUpgrade(db);
-            } catch (ClassNotFoundException | ClassCastException | IllegalAccessException | InstantiationException e) {
-            }
-        }
-    }
-
-    private String getTypeByClass(Class<?> type) throws Exception {
-        if (type.equals(String.class)) {
-            return "TEXT";
-        }
-        if (type.equals(Long.class) || type.equals(Integer.class) || type.equals(long.class)) {
-            return "INTEGER";
-        }
-        if (type.equals(Boolean.class)) {
-            return "BOOLEAN";
-        }
-
-        Exception exception = new Exception(CONVERSION_CLASS_NOT_FOUND_EXCEPTION.concat(" - Class: ").concat(type.toString()));
-//        Crashlytics.logException(exception);
-        throw exception;
-    }
-
-    private static List<String> getColumns(SQLiteDatabase db, String tableName) {
-        List<String> columns = new ArrayList<>();
-        Cursor cursor = null;
         try {
-            cursor = db.rawQuery("SELECT * FROM " + tableName + " limit 1", null);
-            if (cursor != null) {
-                columns = new ArrayList<>(Arrays.asList(cursor.getColumnNames()));
-            }
-        } catch (Exception e) {
-            Log.v(tableName, e.getMessage(), e);
-            e.printStackTrace();
-        } finally {
-            if (cursor != null)
-                cursor.close();
-        }
-        return columns;
-    }
 
-    private static final String CONVERSION_CLASS_NOT_FOUND_EXCEPTION = "MIGRATION HELPER - CLASS DOESN'T MATCH WITH THE CURRENT PARAMETERS";
+            DBMigrationHelper migratorHelper = new DBMigrationHelper();
+            //判断版本， 设置需要修改得表  我这边设置一个 FileInfo
+            if(true) {
+                migratorHelper.onUpgrade(db, FileInfoDao.class);
+            }
+        } catch (ClassCastException e) {
+        }
+    }
 }
