@@ -5,9 +5,9 @@ import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.wenld.databaseupdate.bean.DaoMaster;
-import com.wenld.databaseupdate.bean.FileInfoDao;
 import com.wenld.greendaoupgradehelper.DBMigrationHelper;
+
+import org.greenrobot.greendao.database.StandardDatabase;
 
 
 /**
@@ -23,16 +23,16 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        DaoMaster.createAllTables(sqLiteDatabase, false);
+    public void onCreate(SQLiteDatabase db) {
+        DaoMaster.createAllTables(new StandardDatabase(db), false);
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int currentVersion, int lastestVersion) {
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         try {
             DBMigrationHelper migratorHelper = new DBMigrationHelper();
             //判断版本， 设置需要修改得表  我这边设置一个 FileInfo
-            if(true) {
+            if (true) {
                 migratorHelper.onUpgrade(db, FileInfoDao.class);
             }
         } catch (ClassCastException e) {

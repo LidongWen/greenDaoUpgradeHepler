@@ -4,23 +4,21 @@
 ## 引用
 ```groovy
 // 项目引用
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.greenrobot:greendao-gradle-plugin:3.2.1'
+    }
+}
+apply plugin: 'org.greenrobot.greendao'
+
 dependencies {
-    compile 'com.github.LidongWen:DataBaseUpdate:1.0.0'
+    compile 'com.github.LidongWen:DataBaseUpdate:1.0.1'
 }
 
 // 根目录下引用
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.0'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
-
 allprojects {
     repositories {
         jcenter()
@@ -32,15 +30,23 @@ allprojects {
 在数据库更新这边调用
 
 ```java
-@Override
-public void onUpgrade(SQLiteDatabase db, int currentVersion, int lastestVersion) {
-    try {
-        DBMigrationHelper migratorHelper = new DBMigrationHelper();
-        //判断版本， 设置需要修改得表  我这边设置一个 FileInfo
-        if(true) {
-            migratorHelper.onUpgrade(db, FileInfoDao.class);
-        }
-    } catch (ClassCastException e) {
+public class DBOpenHelper extends SQLiteOpenHelper {
+   .........
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        ....
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        try {
+                DBMigrationHelper migratorHelper = new DBMigrationHelper();
+                //判断版本， 设置需要修改得表  我这边设置一个 FileInfo
+                if(true) {
+                    migratorHelper.onUpgrade(db, FileInfoDao.class);
+                }
+            } catch (ClassCastException e) {
+            }
     }
 }
 ```

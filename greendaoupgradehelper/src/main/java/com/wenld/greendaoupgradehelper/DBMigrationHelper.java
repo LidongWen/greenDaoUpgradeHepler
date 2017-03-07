@@ -7,14 +7,17 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.greenrobot.greendao.AbstractDao;
+import org.greenrobot.greendao.database.Database;
+import org.greenrobot.greendao.database.StandardDatabase;
+import org.greenrobot.greendao.internal.DaoConfig;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.greenrobot.dao.AbstractDao;
-import de.greenrobot.dao.internal.DaoConfig;
 
 /**
  * Created by wenld- on 2015/12/24.
@@ -23,19 +26,20 @@ public class DBMigrationHelper {
     private static final String CONVERSION_CLASS_NOT_FOUND_EXCEPTION = "MIGRATION HELPER - CLASS DOESN'T MATCH WITH THE CURRENT PARAMETERS";
 
     public void onUpgrade(SQLiteDatabase db, Class<? extends AbstractDao<?, ?>>... daoClasses) {
-        generateTempTables(db,daoClasses); //备份数据（表结构改变的表）
-        dropAllTables(db, true, daoClasses);  //删除旧表（结构修改/新增）
-        createAllTables(db, false, daoClasses); //创建 新表（结构修改/新增）
-        restoreData(db, daoClasses);           //恢复数据（结构修改）
+        Database database = new StandardDatabase(db);
+        generateTempTables(database,daoClasses); //备份数据（表结构改变的表）
+        dropAllTables(database, true, daoClasses);  //删除旧表（结构修改/新增）
+        createAllTables(database, false, daoClasses); //创建 新表（结构修改/新增）
+        restoreData(database, daoClasses);           //恢复数据（结构修改）
     }
 
-    private void dropAllTables(SQLiteDatabase db, boolean b, Class<? extends AbstractDao<?, ?>>... daoClasses) {
+    private void dropAllTables(Database db, boolean b, Class<? extends AbstractDao<?, ?>>... daoClasses) {
         if (daoClasses != null) {
             reflectMethod(db, "dropTable", b, daoClasses);
         }
     }
 
-    private void createAllTables(SQLiteDatabase db, boolean b, Class<? extends AbstractDao<?, ?>>... daoClasses) {
+    private void createAllTables(Database db, boolean b, Class<? extends AbstractDao<?, ?>>... daoClasses) {
         if (daoClasses != null) {
             reflectMethod(db, "createTable", b, daoClasses);
         }
@@ -44,7 +48,7 @@ public class DBMigrationHelper {
     /**
      * 反射出方法执行
      */
-    private static void reflectMethod(SQLiteDatabase db, String methodName, boolean isExists, @NonNull Class<? extends AbstractDao<?, ?>>... daoClasses) {
+    private static void reflectMethod(Database db, String methodName, boolean isExists, @NonNull Class<? extends AbstractDao<?, ?>>... daoClasses) {
         if (daoClasses.length < 1) {
             return;
         }
@@ -68,7 +72,7 @@ public class DBMigrationHelper {
      * @param db
      * @param daoClasses（表结构改变的表）
      */
-    private void generateTempTables(SQLiteDatabase db, Class<? extends AbstractDao<?, ?>>... daoClasses) {
+    private void generateTempTables(Database db, Class<? extends AbstractDao<?, ?>>... daoClasses) {
         for (int i = 0; i < daoClasses.length; i++) {
             DaoConfig daoConfig = new DaoConfig(db, daoClasses[i]);
             String divider = "";
@@ -113,7 +117,7 @@ public class DBMigrationHelper {
      * @param db
      * @param daoClasses（结构修改的表）
      */
-    private void restoreData(SQLiteDatabase db, Class<? extends AbstractDao<?, ?>>... daoClasses) {
+    private void restoreData(Database db, Class<? extends AbstractDao<?, ?>>... daoClasses) {
         for (int i = 0; i < daoClasses.length; i++) {
             DaoConfig daoConfig = new DaoConfig(db, daoClasses[i]);
 
@@ -162,7 +166,7 @@ public class DBMigrationHelper {
         throw exception;
     }
 
-    private static List<String> getColumns(SQLiteDatabase db, String tableName) {
+    private static List<String> getColumns(Database db, String tableName) {
         List<String> columns = new ArrayList<>();
         Cursor cursor = null;
         try {
