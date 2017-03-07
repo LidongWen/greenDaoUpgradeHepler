@@ -14,11 +14,6 @@ buildscript {
 }
 apply plugin: 'org.greenrobot.greendao'
 
-dependencies {
-    compile 'com.github.LidongWen:DataBaseUpdate:1.0.1'
-}
-
-// 根目录下引用
 allprojects {
     repositories {
         jcenter()
