@@ -54,7 +54,8 @@ public class DBMigrationHelper {
         }
         try {
             for (Class cls : daoClasses) {
-                Method method = cls.getDeclaredMethod(methodName, cls);
+                // Method method = cls.getDeclaredMethod(methodName, cls);
+				Method method = cls.getDeclaredMethod(methodName, Database.class, boolean.class);//update by wragony on 2017-06-27
                 method.invoke(null, db, isExists);
             }
         } catch (NoSuchMethodException e) {
@@ -143,7 +144,8 @@ public class DBMigrationHelper {
 
             StringBuilder dropTableStringBuilder = new StringBuilder();
 
-            dropTableStringBuilder.append("DROP TABLE ").append(tempTableName);
+            //dropTableStringBuilder.append("DROP TABLE ").append(tempTableName);
+			dropTableStringBuilder.append("DROP TABLE IF EXISTS ").append(tempTableName).append(";");// update by wragony on 2017-06-27
 
             db.execSQL(insertTableStringBuilder.toString());
             db.execSQL(dropTableStringBuilder.toString());
