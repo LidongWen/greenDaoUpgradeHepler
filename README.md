@@ -49,6 +49,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     }
 }
 ```
-
+## thank
+[wragony](https://github.com/wragony)
 ## Contact me
-blog: [wenld's blog](http://blog.csdn.net/sinat_15877283)
+blog: [wenld's blog](http://www.jianshu.com/u/99f514ea81b3)
