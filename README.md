@@ -14,7 +14,7 @@ buildscript {
 }
 apply plugin: 'org.greenrobot.greendao'
 
-  compile 'com.github.LidongWen:DataBaseUpdate:1.0.1'
+  compile 'com.github.LidongWen:DataBaseUpdate:1.0.2'
 ```
 根目录
 ```groovy
